@@ -11,5 +11,5 @@ In ``add_blank_pages.sh``, I have modified some code from this post: https://sta
 To run:
 
 ```
-bash add_blank_pages.sh my_file.pdf
+bash add_blank_pages.sh my_file.pdf <number_of_blank_pages> <page_number_to_start>
 ```

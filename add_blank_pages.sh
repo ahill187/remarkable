@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]
+if [ $# -ne 3 ]
 then
   echo "Usage example: ./bashscript src.pdf"
   exit $E_BADARGS
@@ -8,16 +8,30 @@ else
   NUM=$(pdftk $1 dump_data | grep 'NumberOfPages' | awk '{split($0,a,": "); print a[2]}')
   echo $NUM
   COMMSTR=''
+  NUM_BLANK_PAGES=$2
+  PAGE_START=$3
+  echo $NUM_BLANK_PAGES
 
-  for i in $(seq 1 $NUM);
+  for i in $(seq 1 "$(($PAGE_START-1))");
   do
-    COMMSTR="$COMMSTR A$i B1 "
+    COMMSTR="$COMMSTR A$i"
+  done
+
+  for i in $(seq $PAGE_START $NUM);
+  do
+    COMMSTR="$COMMSTR A$i"
+    for blank_page in $(seq 1 $NUM_BLANK_PAGES);
+    do
+      COMMSTR="$COMMSTR B1"
+    done
   done
   echo $COMMSTR
+
+  FILE=$(basename $1)
   $(echo "" | ps2pdf -sPAPERSIZE=a4 - pageblanche.pdf)
-  # $(pdftk A=$1 B=pageblanche.pdf cat $COMMSTR output 'mod_'$1)
-  # (pdfjam 'mod_'$1 --nup 2x1 --landscape --outfile 'print_'$1)
-  # $(rm pageblanche.pdf && rm 'mod_'$1)
+  $(pdftk A=$1 B=pageblanche.pdf cat $COMMSTR output 'mod_'$FILE)
+  (pdfjam 'mod_'$FILE --no-landscape --outfile 'print_'$FILE)
+  $(rm pageblanche.pdf && rm 'mod_'$FILE)
 
 fi
 
